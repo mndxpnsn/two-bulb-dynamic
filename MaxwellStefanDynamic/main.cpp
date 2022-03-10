@@ -73,7 +73,6 @@ void lu_decomposition(double ** A,
                       double ** L,
                       double ** U) {
 
-    /* Initialize L */
     for(int i = 0; i < N; ++i) {
         for(int j = 0; j < N; ++j) {
             if(i == j) {
@@ -85,7 +84,6 @@ void lu_decomposition(double ** A,
         }
     }
 
-    /* Initialize U */
     for(int i = 0; i < N; ++i) {
         for(int j = 0; j < N; ++j) {
             if(i > j) {
@@ -94,7 +92,6 @@ void lu_decomposition(double ** A,
         }
     }
 
-    /* LU decomposition */
     for(int k = 0; k < N; ++k) {
         U[k][k] = A[k][k];
         for(int i = k + 1; i < N; ++i) {
@@ -169,7 +166,6 @@ void compute_linear_system(double ** b_vec,
     double dz = su_params.len / ng;
     double ct = p_params.ct;
     
-    /* Compute fluxes */
     //0
     for(int c = 0; c < n; ++c) {
         b_vec[0][c] = -ct * (x_vec[0][c] - b_comp.x_b1[c]) / (0.5 * dz);
@@ -197,7 +193,7 @@ void compute_linear_system(double ** b_vec,
         }
     }
     
-    //mid
+    // mid
     for(int g = 1; g < ng; ++g) {
         for(int c = 0; c < n; ++c) {
             b_vec[g][c] = -ct * (x_vec[g][c] - x_vec[g - 1][c]) / dz;
@@ -228,7 +224,7 @@ void compute_linear_system(double ** b_vec,
         }
     }
     
-    //n
+    // n
     for(int c = 0; c < n; ++c) {
         b_vec[ng][c] = -ct * (b_comp.x_b2[c] - x_vec[ng - 1][c]) / (0.5 * dz);
     }
@@ -271,17 +267,17 @@ void update_composition(int ng,
     double ct = p_params.ct;
     double dz = su_params.len / ng;
     
-    //Bulb1
+    // Bulb1
     double diff = 1.0;
     for(int c = 0; c < n - 1; ++c) {
         b_comps.x_b1[c] = b_comps.x_b1[c] - J[0][c] * dt * 3.14 * d * d / 4.0 / (V * ct);
         diff = diff - b_comps.x_b1[c];
     }
     
-    //Update mole fraction of component n in bulb 1
+    // Update mole fraction of component n in bulb 1
     b_comps.x_b1[n - 1] = diff;
     
-    //Tube
+    // Tube
     for(int g = 0; g < ng; ++g) {
         diff = 1.0;
         for(int c = 0; c < n - 1; ++c) {
@@ -293,14 +289,14 @@ void update_composition(int ng,
         tube_fracs[g][n - 1] = diff;
     }
     
-    //Bulb2
+    // Bulb2
     diff = 1.0;
     for(int c = 0; c < n - 1; ++c) {
         b_comps.x_b2[c] = b_comps.x_b2[c] + J[ng][c] * dt * 3.14 * d * d / 4.0 / (V * ct);
         diff = diff - b_comps.x_b2[c];
     }
     
-    //Update mole fraction of component n in bulb 2
+    // Update mole fraction of component n in bulb 2
     b_comps.x_b2[n - 1] = diff;
 }
 
@@ -348,7 +344,7 @@ int main(int argc, char* argv[]) {
     t_params_t time_params;
     time_params.to = 0.0;
     time_params.tf = 20.0;
-    time_params.dt = 1e-6;
+    time_params.dt = 1e-6; // This value has to be low for accuracy
     
     // Initial composition bulb1
     double xb10 = 0.501; // H2 fraction
