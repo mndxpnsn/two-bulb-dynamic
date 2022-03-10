@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     
     // Input concentration
     p_params_t physical_params;
-    physical_params.ct = 1.0;
+    physical_params.ct = 1.0; // Total concentration
     
     // Diffusivities
     double D12 = 8.33e-5 * 3600; // units are (m2 / h)
@@ -31,14 +31,14 @@ int main(int argc, char* argv[]) {
     
     // Experimental setup parameters
     su_params_t set_up_params;
-    set_up_params.V = 5e-4;
-    set_up_params.d = 2e-3;
-    set_up_params.len = 1e-2;
+    set_up_params.V = 5e-4; // Volume of the compartments (m3)
+    set_up_params.d = 2e-3; // Diameter of tube (m)
+    set_up_params.len = 1e-2; // Length of tube (m)
     
     // Time parameters
     t_params_t time_params;
-    time_params.to = 0.0;
-    time_params.tf = 20.0;
+    time_params.to = 0.0; // Initial time (h)
+    time_params.tf = 20.0; // Final time (h)
     time_params.dt = 1e-6; // This value has to be low for accuracy
     
     // Initial composition bulb1
