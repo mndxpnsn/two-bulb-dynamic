@@ -2,7 +2,7 @@
 //  main.cpp
 //  MaxwellStefanDynamic
 //
-//  Created by Derek Harrison on 09/03/2022.
+//  Created by mndx on 09/03/2022.
 //
 
 #include <iostream>

@@ -2,7 +2,7 @@
 //  user_types.h
 //  MaxwellStefanDynamic
 //
-//  Created by Derek Harrison on 10/03/2022.
+//  Created by mndx on 10/03/2022.
 //
 
 #ifndef user_types_h
