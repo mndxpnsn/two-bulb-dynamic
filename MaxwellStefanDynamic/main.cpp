@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     int num_components = 3;
     int num_grid_cells = 6;
     
-    // Input concentration
+    // Total concentration
     p_params_t physical_params;
     physical_params.ct = 1.0; // Total concentration
     
@@ -73,12 +73,15 @@ int main(int argc, char* argv[]) {
     physical_params.D[2][0] = D13;
     physical_params.D[2][1] = D23;
     
+    e_data_t experiment_data;
+    experiment_data.p_params = physical_params;
+    experiment_data.time_params = time_params;
+    experiment_data.su_params = set_up_params;
+    
     // Perform simulation of dynamic two-bulb experiment
     compute_compositions(num_components,
                          num_grid_cells,
-                         physical_params,
-                         time_params,
-                         set_up_params,
+                         experiment_data,
                          bulb_compositions);
     
     // Print results

@@ -150,21 +150,19 @@ void mat_mat_mult(double ** A, int n, double ** B, double ** C) {
     }
 }
 
-void compute_linear_system(double ** b_vec,
-                           double ** x_vec,
+void compute_linear_system(int n,
                            int ng,
-                           int n,
+                           s_data_t sim_data,
+                           e_data_t experiment_data,
                            b_comp_t b_comp,
-                           p_params_t p_params,
-                           su_params_t su_params,
                            double *** a) {
     
-    double dz = su_params.len / ng;
-    double ct = p_params.ct;
+    double dz = experiment_data.su_params.len / ng;
+    double ct = experiment_data.p_params.ct;
     
     //0
     for(int c = 0; c < n; ++c) {
-        b_vec[0][c] = -ct * (x_vec[0][c] - b_comp.x_b1[c]) / (0.5 * dz);
+        sim_data.grad_vec[0][c] = -ct * (sim_data.tube_fracs[0][c] - b_comp.x_b1[c]) / (0.5 * dz);
     }
     
     for(int i = 0; i < n; ++i) {
@@ -174,17 +172,18 @@ void compute_linear_system(double ** b_vec,
             diff = diff - b_comp.x_b1[k];
             if(i != k) {
                 double xk_loc = b_comp.x_b1[k];
-                aii = aii + xk_loc / p_params.D[i][k];
+                aii = aii + xk_loc / experiment_data.p_params.D[i][k];
             }
         }
-        aii = aii + b_comp.x_b1[i] / p_params.D[i][n - 1];
+        aii = aii + b_comp.x_b1[i] / experiment_data.p_params.D[i][n - 1];
         a[0][i][i] = aii;
     }
     
     for(int i = 0; i < n; ++i) {
         for(int j = 0; j < n; ++j) {
             if(i != j) {
-                a[0][i][j] = b_comp.x_b1[i] * (1.0 / p_params.D[0][n - 1] - 1.0 / p_params.D[i][j]);
+                a[0][i][j] = b_comp.x_b1[i] *
+                            (1.0 / experiment_data.p_params.D[0][n - 1] - 1.0 / experiment_data.p_params.D[i][j]);
             }
         }
     }
@@ -192,7 +191,7 @@ void compute_linear_system(double ** b_vec,
     // mid
     for(int g = 1; g < ng; ++g) {
         for(int c = 0; c < n; ++c) {
-            b_vec[g][c] = -ct * (x_vec[g][c] - x_vec[g - 1][c]) / dz;
+            sim_data.grad_vec[g][c] = -ct * (sim_data.tube_fracs[g][c] - sim_data.tube_fracs[g - 1][c]) / dz;
         }
     }
     
@@ -201,20 +200,21 @@ void compute_linear_system(double ** b_vec,
             double aii = 0.0;
             double diff = 1.0;
             for(int k = 0; k < n; ++k) {
-                diff = diff - x_vec[g][k];
+                diff = diff - sim_data.tube_fracs[g][k];
                 if(i != k) {
-                    double xk_loc = (x_vec[g][k] + x_vec[g - 1][k]) / 2;
-                    aii = aii + xk_loc / p_params.D[i][k];
+                    double xk_loc = (sim_data.tube_fracs[g][k] + sim_data.tube_fracs[g - 1][k]) / 2;
+                    aii = aii + xk_loc / experiment_data.p_params.D[i][k];
                 }
             }
-            aii = aii + x_vec[g][i] / p_params.D[i][n - 1];
+            aii = aii + sim_data.tube_fracs[g][i] / experiment_data.p_params.D[i][n - 1];
             a[g][i][i] = aii;
         }
         
         for(int i = 0; i < n; ++i) {
             for(int j = 0; j < n; ++j) {
                 if(i != j) {
-                    a[g][i][j] = x_vec[g][i] * (1.0 / p_params.D[i][n - 1] - 1.0 / p_params.D[i][j]);
+                    a[g][i][j] = sim_data.tube_fracs[g][i] *
+                                (1.0 / experiment_data.p_params.D[i][n - 1] - 1.0 / experiment_data.p_params.D[i][j]);
                 }
             }
         }
@@ -222,7 +222,7 @@ void compute_linear_system(double ** b_vec,
     
     // n
     for(int c = 0; c < n; ++c) {
-        b_vec[ng][c] = -ct * (b_comp.x_b2[c] - x_vec[ng - 1][c]) / (0.5 * dz);
+        sim_data.grad_vec[ng][c] = -ct * (b_comp.x_b2[c] - sim_data.tube_fracs[ng - 1][c]) / (0.5 * dz);
     }
     
     for(int i = 0; i < n; ++i) {
@@ -232,17 +232,18 @@ void compute_linear_system(double ** b_vec,
             diff = diff - b_comp.x_b2[k];
             if(i != k) {
                 double xk_loc = b_comp.x_b2[k];
-                aii = aii + xk_loc / p_params.D[i][k];
+                aii = aii + xk_loc / experiment_data.p_params.D[i][k];
             }
         }
-        aii = aii + b_comp.x_b2[i] / p_params.D[i][n - 1];
+        aii = aii + b_comp.x_b2[i] / experiment_data.p_params.D[i][n - 1];
         a[ng][i][i] = aii;
     }
     
     for(int i = 0; i < n; ++i) {
         for(int j = 0; j < n; ++j) {
             if(i != j) {
-                a[ng][i][j] = b_comp.x_b2[i] * (1.0 / p_params.D[i][n - 1] - 1.0 / p_params.D[i][j]);
+                a[ng][i][j] = b_comp.x_b2[i] *
+                            (1.0 / experiment_data.p_params.D[i][n - 1] - 1.0 / experiment_data.p_params.D[i][j]);
             }
         }
     }
@@ -250,23 +251,20 @@ void compute_linear_system(double ** b_vec,
 
 void update_composition(int ng,
                         int n,
-                        double ** J,
-                        t_params_t time_params,
-                        p_params_t p_params,
-                        b_comp_t b_comps,
-                        su_params_t su_params,
-                        double ** tube_fracs) {
+                        s_data_t sim_data,
+                        e_data_t experiment_data,
+                        b_comp_t b_comps) {
     
-    double dt = time_params.dt;
-    double d = su_params.d;
-    double V = su_params.V;
-    double ct = p_params.ct;
-    double dz = su_params.len / ng;
-    
+    double dt = experiment_data.time_params.dt;
+    double d = experiment_data.su_params.d;
+    double V = experiment_data.su_params.V;
+    double ct = experiment_data.p_params.ct;
+    double dz = experiment_data.su_params.len / ng;
+    double Ac = 3.14 * d * d / 4.0;
     // Bulb1
     double diff = 1.0;
     for(int c = 0; c < n - 1; ++c) {
-        b_comps.x_b1[c] = b_comps.x_b1[c] - J[0][c] * dt * 3.14 * d * d / 4.0 / (V * ct);
+        b_comps.x_b1[c] = b_comps.x_b1[c] - sim_data.flux_vec[0][c] * dt * Ac / (V * ct);
         diff = diff - b_comps.x_b1[c];
     }
     
@@ -277,18 +275,20 @@ void update_composition(int ng,
     for(int g = 0; g < ng; ++g) {
         diff = 1.0;
         for(int c = 0; c < n - 1; ++c) {
-            tube_fracs[g][c] = tube_fracs[g][c] - (J[g + 1][c] - J[g][c]) * dt / (ct * dz);
-            diff = diff - tube_fracs[g][c];
+            sim_data.tube_fracs[g][c] = sim_data.tube_fracs[g][c] -
+            (sim_data.flux_vec[g + 1][c] - sim_data.flux_vec[g][c]) * dt / (ct * dz);
+            
+            diff = diff - sim_data.tube_fracs[g][c];
         }
         
         //Update mole fraction of component n in the tube
-        tube_fracs[g][n - 1] = diff;
+        sim_data.tube_fracs[g][n - 1] = diff;
     }
     
     // Bulb2
     diff = 1.0;
     for(int c = 0; c < n - 1; ++c) {
-        b_comps.x_b2[c] = b_comps.x_b2[c] + J[ng][c] * dt * 3.14 * d * d / 4.0 / (V * ct);
+        b_comps.x_b2[c] = b_comps.x_b2[c] + sim_data.flux_vec[ng][c] * dt * Ac / (V * ct);
         diff = diff - b_comps.x_b2[c];
     }
     
@@ -317,58 +317,68 @@ void init_tube(int ng, int n, double ** x) {
 
 void compute_compositions(int num_components,
                           int num_grid_cells,
-                          p_params_t physical_params,
-                          t_params_t time_params,
-                          su_params_t set_up_params,
+                          e_data_t experiment_data,
                           b_comp_t bulb_compositions) {
-    // Set up input
+    
+    // LU decomposition data
     double *** A = mat3D(num_grid_cells + 1, num_components, num_components);
     double *** L = mat3D(num_grid_cells + 1, num_components, num_components);
     double *** U = mat3D(num_grid_cells + 1, num_components, num_components);
     
-    double ** tube_fracs = mat2D(num_grid_cells, num_components);
-    double ** grad_vec = mat2D(num_grid_cells + 1, num_components);
-    double ** flux_vec = mat2D(num_grid_cells + 1, num_components);
-    double ** z_vec = mat2D(num_grid_cells + 1, num_components);
+    // Simulatiton data
+    s_data_t sim_data;
+    sim_data.tube_fracs = mat2D(num_grid_cells, num_components);
+    sim_data.grad_vec = mat2D(num_grid_cells + 1, num_components);
+    sim_data.flux_vec = mat2D(num_grid_cells + 1, num_components);
+    sim_data.z_vec = mat2D(num_grid_cells + 1, num_components);
     
     // Initialize tube region
-    init_tube(num_grid_cells, num_components, tube_fracs);
+    init_tube(num_grid_cells, num_components, sim_data.tube_fracs);
     
     // Perform simulation
-    double t = time_params.to;
+    double t = experiment_data.time_params.to;
+    double tf = experiment_data.time_params.tf;
+    double dt = experiment_data.time_params.dt;
     
-    while(t < time_params.tf) {
+    while(t < tf) {
 
-        compute_linear_system(grad_vec,
-                              tube_fracs,
+        compute_linear_system(num_components,
                               num_grid_cells,
-                              num_components,
+                              sim_data,
+                              experiment_data,
                               bulb_compositions,
-                              physical_params,
-                              set_up_params,
                               A);
         
         for(int g = 0; g < num_grid_cells + 1; ++g) {
-            lu_decomposition(A[g], num_components, L[g], U[g]);
             
-            solve_Lz(L[g], num_components, grad_vec[g], z_vec[g]);
+            lu_decomposition(A[g],
+                             num_components,
+                             L[g],
+                             U[g]);
+            
+            solve_Lz(L[g],
+                     num_components,
+                     sim_data.grad_vec[g],
+                     sim_data.z_vec[g]);
 
-            solve_Uy(U[g], num_components, z_vec[g], flux_vec[g]);
+            solve_Uy(U[g],
+                     num_components,
+                     sim_data.z_vec[g],
+                     sim_data.flux_vec[g]);
         }
         
         // Compute flux of component n
-        compute_flux_n(num_grid_cells, flux_vec, num_components);
+        compute_flux_n(num_grid_cells,
+                       sim_data.flux_vec,
+                       num_components);
         
         update_composition(num_grid_cells,
                            num_components,
-                           flux_vec,
-                           time_params,
-                           physical_params,
-                           bulb_compositions,
-                           set_up_params,
-                           tube_fracs);
+                           sim_data,
+                           experiment_data,
+                           bulb_compositions);
         
-        t = t + time_params.dt;
+        t = t + dt;
     }
     
     // Deallocate data
@@ -376,8 +386,8 @@ void compute_compositions(int num_components,
     free_mat3D(U, num_grid_cells + 1, num_components);
     free_mat3D(L, num_grid_cells + 1, num_components);
     
-    free_mat2D(tube_fracs, num_grid_cells);
-    free_mat2D(grad_vec, num_grid_cells + 1);
-    free_mat2D(flux_vec, num_grid_cells + 1);
-    free_mat2D(z_vec, num_grid_cells + 1);
+    free_mat2D(sim_data.tube_fracs, num_grid_cells);
+    free_mat2D(sim_data.grad_vec, num_grid_cells + 1);
+    free_mat2D(sim_data.flux_vec, num_grid_cells + 1);
+    free_mat2D(sim_data.z_vec, num_grid_cells + 1);
 }
