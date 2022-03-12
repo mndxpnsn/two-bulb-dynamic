@@ -14,6 +14,8 @@
 
 double ** mat2D(int nx, int ny);
 
+void free_mat2D(double ** mat, int nx);
+
 double *** mat3D(int ng, int nx, int ny);
 
 void lu_decomposition(double ** A,
@@ -50,5 +52,12 @@ void update_composition(int ng,
 void compute_flux_n(int ng, double ** J, int n);
 
 void init_tube(int ng, int n, double ** x);
+
+void compute_compositions(int num_components,
+                          int num_grid_cells,
+                          p_params_t physical_params,
+                          t_params_t time_params,
+                          su_params_t set_up_params,
+                          b_comp_t bulb_compositions);
 
 #endif /* lib_hpp */

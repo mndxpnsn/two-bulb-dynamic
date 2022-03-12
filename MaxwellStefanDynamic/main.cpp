@@ -52,21 +52,10 @@ int main(int argc, char* argv[]) {
     double xb22 = 1 - xb20 - xb21; // CO2 fraction
     
     // Set up input
-    physical_params.D = mat2D(num_components, num_components);
-    
-    double *** A = mat3D(num_grid_cells + 1, num_components, num_components);
-    double *** L = mat3D(num_grid_cells + 1, num_components, num_components);
-    double *** U = mat3D(num_grid_cells + 1, num_components, num_components);
-    
     b_comp_t bulb_compositions;
     bulb_compositions.x_b1 = new double[num_components];
     bulb_compositions.x_b2 = new double[num_components];
     
-    double ** tube_fracs = mat2D(num_grid_cells, num_components);
-    double ** grad_vec = mat2D(num_grid_cells + 1, num_components);
-    double ** flux_vec = mat2D(num_grid_cells + 1, num_components);
-    double ** z_vec = mat2D(num_grid_cells + 1, num_components);
-   
     bulb_compositions.x_b1[0] = xb10;
     bulb_compositions.x_b1[1] = xb11;
     bulb_compositions.x_b1[2] = xb12;
@@ -75,6 +64,7 @@ int main(int argc, char* argv[]) {
     bulb_compositions.x_b2[1] = xb21;
     bulb_compositions.x_b2[2] = xb22;
     
+    physical_params.D = mat2D(num_components, num_components);
     physical_params.D[0][1] = D12;
     physical_params.D[0][2] = D13;
     physical_params.D[1][2] = D23;
@@ -83,45 +73,13 @@ int main(int argc, char* argv[]) {
     physical_params.D[2][0] = D13;
     physical_params.D[2][1] = D23;
     
-    // Initialize tube region
-    init_tube(num_grid_cells, num_components, tube_fracs);
-    
-    // Perform simulation
-    double t = time_params.to;
-    
-    while(t < time_params.tf) {
-
-        compute_linear_system(grad_vec,
-                              tube_fracs,
-                              num_grid_cells,
-                              num_components,
-                              bulb_compositions,
-                              physical_params,
-                              set_up_params,
-                              A);
-        
-        for(int g = 0; g < num_grid_cells + 1; ++g) {
-            lu_decomposition(A[g], num_components, L[g], U[g]);
-            
-            solve_Lz(L[g], num_components, grad_vec[g], z_vec[g]);
-
-            solve_Uy(U[g], num_components, z_vec[g], flux_vec[g]);
-        }
-        
-        // Compute flux of component n
-        compute_flux_n(num_grid_cells, flux_vec, num_components);
-        
-        update_composition(num_grid_cells,
-                           num_components,
-                           flux_vec,
-                           time_params,
-                           physical_params,
-                           bulb_compositions,
-                           set_up_params,
-                           tube_fracs);
-        
-        t = t + time_params.dt;
-    }
+    // Perform simulation of dynamic two-bulb experiment
+    compute_compositions(num_components,
+                         num_grid_cells,
+                         physical_params,
+                         time_params,
+                         set_up_params,
+                         bulb_compositions);
     
     // Print results
     std::cout << "bulb 1" << std::endl;
@@ -131,6 +89,11 @@ int main(int argc, char* argv[]) {
     std::cout << "bulb 2" << std::endl;
     for(int c = 0; c < num_components; ++c)
         std::cout << "Fraction of component " << c << ": " << bulb_compositions.x_b2[c] << std::endl;
+    
+    // Deallocate data
+    delete [] bulb_compositions.x_b1;
+    delete [] bulb_compositions.x_b2;
+    free_mat2D(physical_params.D, num_components);
     
     return 0;
 }

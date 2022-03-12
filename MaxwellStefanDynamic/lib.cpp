@@ -22,6 +22,15 @@ double ** mat2D(int nx, int ny) {
     return f;
 }
 
+void free_mat2D(double ** mat, int nx) {
+    
+    for(int i = 0; i < nx; ++i) {
+        delete [] mat[i];
+    }
+    
+    delete [] mat;
+}
+
 double *** mat3D(int ng, int nx, int ny) {
 
     double *** f = new double ** [ng];
@@ -37,10 +46,22 @@ double *** mat3D(int ng, int nx, int ny) {
                 f[g][i][j] = 1e-13;
             }
         }
-        
     }
 
     return f;
+}
+
+void free_mat3D(double *** mat, int nx, int ny) {
+    
+    for(int i = 0; i < nx; ++i) {
+        for(int j = 0; j < ny; ++j) {
+            delete [] mat[i][j];
+        }
+        
+        delete [] mat[i];
+    }
+    
+    delete [] mat;
 }
 
 void lu_decomposition(double ** A,
@@ -292,4 +313,71 @@ void init_tube(int ng, int n, double ** x) {
             x[g][c] = 1.0 / n;
         }
     }
+}
+
+void compute_compositions(int num_components,
+                          int num_grid_cells,
+                          p_params_t physical_params,
+                          t_params_t time_params,
+                          su_params_t set_up_params,
+                          b_comp_t bulb_compositions) {
+    // Set up input
+    double *** A = mat3D(num_grid_cells + 1, num_components, num_components);
+    double *** L = mat3D(num_grid_cells + 1, num_components, num_components);
+    double *** U = mat3D(num_grid_cells + 1, num_components, num_components);
+    
+    double ** tube_fracs = mat2D(num_grid_cells, num_components);
+    double ** grad_vec = mat2D(num_grid_cells + 1, num_components);
+    double ** flux_vec = mat2D(num_grid_cells + 1, num_components);
+    double ** z_vec = mat2D(num_grid_cells + 1, num_components);
+    
+    // Initialize tube region
+    init_tube(num_grid_cells, num_components, tube_fracs);
+    
+    // Perform simulation
+    double t = time_params.to;
+    
+    while(t < time_params.tf) {
+
+        compute_linear_system(grad_vec,
+                              tube_fracs,
+                              num_grid_cells,
+                              num_components,
+                              bulb_compositions,
+                              physical_params,
+                              set_up_params,
+                              A);
+        
+        for(int g = 0; g < num_grid_cells + 1; ++g) {
+            lu_decomposition(A[g], num_components, L[g], U[g]);
+            
+            solve_Lz(L[g], num_components, grad_vec[g], z_vec[g]);
+
+            solve_Uy(U[g], num_components, z_vec[g], flux_vec[g]);
+        }
+        
+        // Compute flux of component n
+        compute_flux_n(num_grid_cells, flux_vec, num_components);
+        
+        update_composition(num_grid_cells,
+                           num_components,
+                           flux_vec,
+                           time_params,
+                           physical_params,
+                           bulb_compositions,
+                           set_up_params,
+                           tube_fracs);
+        
+        t = t + time_params.dt;
+    }
+    
+    // Deallocate data
+    free_mat3D(A, num_grid_cells + 1, num_components);
+    free_mat3D(U, num_grid_cells + 1, num_components);
+    free_mat3D(L, num_grid_cells + 1, num_components);
+    
+    free_mat2D(tube_fracs, num_grid_cells);
+    free_mat2D(grad_vec, num_grid_cells + 1);
+    free_mat2D(flux_vec, num_grid_cells + 1);
+    free_mat2D(z_vec, num_grid_cells + 1);
 }
