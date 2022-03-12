@@ -66,10 +66,7 @@ void free_mat3D(double *** mat, int nx, int ny) {
     delete [] mat;
 }
 
-void lu_decomposition(double ** A,
-                      int N,
-                      double ** L,
-                      double ** U) {
+void lu_decomposition(double ** A, int N, double ** L, double ** U) {
 
     for(int i = 0; i < N; ++i) {
         for(int j = 0; j < N; ++j) {
