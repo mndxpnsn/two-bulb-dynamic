@@ -34,7 +34,7 @@ typedef struct simulation_data {
     double ** tube_fracs;
     double ** grad_vec;
     double ** flux_vec;
-    double ** z_vec ;
+    double ** z_vec;
 } s_data_t;
 
 typedef struct experiment_data {
