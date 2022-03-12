@@ -159,7 +159,7 @@ void compute_linear_system(int n,
     double dz = experiment_data.su_params.len / ng;
     double ct = experiment_data.p_params.ct;
     
-    //0
+    // Left most node
     for(int c = 0; c < n; ++c) {
         sim_data.grad_vec[0][c] = -ct * (sim_data.tube_fracs[0][c] - b_comp.x_b1[c]) / (0.5 * dz);
     }
@@ -187,7 +187,7 @@ void compute_linear_system(int n,
         }
     }
     
-    // mid
+    // Middle nodes
     for(int g = 1; g < ng; ++g) {
         for(int c = 0; c < n; ++c) {
             sim_data.grad_vec[g][c] = -ct * (sim_data.tube_fracs[g][c] - sim_data.tube_fracs[g - 1][c]) / dz;
@@ -219,7 +219,7 @@ void compute_linear_system(int n,
         }
     }
     
-    // n
+    // Node n
     for(int c = 0; c < n; ++c) {
         sim_data.grad_vec[ng][c] = -ct * (b_comp.x_b2[c] - sim_data.tube_fracs[ng - 1][c]) / (0.5 * dz);
     }
@@ -260,6 +260,7 @@ void update_composition(int ng,
     double ct = experiment_data.p_params.ct;
     double dz = experiment_data.su_params.len / ng;
     double Ac = 3.14 * d * d / 4.0;
+    
     // Bulb1
     double diff = 1.0;
     for(int c = 0; c < n - 1; ++c) {
