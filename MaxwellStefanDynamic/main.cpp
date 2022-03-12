@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     t_params_t time_params;
     time_params.to = 0.0; // Initial time (h)
     time_params.tf = 20.0; // Final time (h)
-    time_params.dt = 1e-6; // This value has to be low for accuracy
+    time_params.dt = 1e-6; // Time sampling. This value has to be low for accuracy
     
     // Initial composition bulb1
     double xb10 = 0.501; // H2 fraction
