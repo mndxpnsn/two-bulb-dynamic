@@ -182,7 +182,7 @@ void compute_linear_system(int n,
         for(int j = 0; j < n; ++j) {
             if(i != j) {
                 a[0][i][j] = b_comp.x_b1[i] *
-                            (1.0 / experiment_data.p_params.D[0][n - 1] - 1.0 / experiment_data.p_params.D[i][j]);
+                            (1.0 / experiment_data.p_params.D[i][n - 1] - 1.0 / experiment_data.p_params.D[i][j]);
             }
         }
     }
