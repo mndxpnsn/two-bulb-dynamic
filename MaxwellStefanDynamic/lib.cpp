@@ -296,14 +296,14 @@ void update_composition(int ng,
     b_comps.x_b2[n - 1] = diff;
 }
 
-void compute_flux_n(int ng, double ** J, int n) {
+void compute_flux_n(int n, int ng, s_data_t sim_data) {
     //Compute flux of component n
     for(int g = 0; g < ng; ++g) {
         double Jn = 0.0;
         for(int c = 0; c < n - 1; ++c) {
-            Jn = Jn - J[g][c];
+            Jn = Jn - sim_data.flux_vec[g][c];
         }
-        J[g][n - 1] = Jn;
+        sim_data.flux_vec[g][n - 1] = Jn;
     }
 }
 
@@ -368,9 +368,9 @@ void compute_compositions(int num_components,
         }
         
         // Compute flux of component n
-        compute_flux_n(num_grid_cells,
-                       sim_data.flux_vec,
-                       num_components);
+        compute_flux_n(num_components,
+                       num_grid_cells,
+                       sim_data);
         
         update_composition(num_grid_cells,
                            num_components,
