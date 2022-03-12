@@ -248,8 +248,8 @@ void compute_linear_system(int n,
     }
 }
 
-void update_composition(int ng,
-                        int n,
+void update_composition(int n,
+                        int ng,
                         s_data_t sim_data,
                         e_data_t experiment_data,
                         b_comp_t b_comps) {
@@ -372,8 +372,8 @@ void compute_compositions(int num_components,
                        num_grid_cells,
                        sim_data);
         
-        update_composition(num_grid_cells,
-                           num_components,
+        update_composition(num_components,
+                           num_grid_cells,
                            sim_data,
                            experiment_data,
                            bulb_compositions);
