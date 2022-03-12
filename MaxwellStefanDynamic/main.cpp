@@ -85,13 +85,7 @@ int main(int argc, char* argv[]) {
                          bulb_compositions);
     
     // Print results
-    std::cout << "bulb 1" << std::endl;
-    for(int c = 0; c < num_components; ++c)
-        std::cout << "Fraction of component " << c << ": " << bulb_compositions.x_b1[c] << std::endl;
-    
-    std::cout << "bulb 2" << std::endl;
-    for(int c = 0; c < num_components; ++c)
-        std::cout << "Fraction of component " << c << ": " << bulb_compositions.x_b2[c] << std::endl;
+    print_results(num_components, bulb_compositions);
     
     // Deallocate data
     delete [] bulb_compositions.x_b1;

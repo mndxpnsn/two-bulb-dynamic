@@ -18,10 +18,7 @@ void free_mat2D(double ** mat, int nx);
 
 double *** mat3D(int ng, int nx, int ny);
 
-void lu_decomposition(double ** A,
-                      int N,
-                      double ** L,
-                      double ** U);
+void lu_decomposition(double ** A, int N, double ** L, double ** U);
 
 void solve_Uy(double ** U, int n, double * z, double * y);
 
@@ -57,5 +54,7 @@ void compute_compositions(int num_components,
                           int num_grid_cells,
                           e_data_t experiment_data,
                           b_comp_t bulb_compositions);
+
+void print_results(int num_components, b_comp_t bulb_compositions);
 
 #endif /* lib_hpp */

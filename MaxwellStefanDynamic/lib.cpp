@@ -5,6 +5,8 @@
 //  Created by mndx on 10/03/2022.
 //
 
+#include <iostream>
+
 #include "lib.hpp"
 #include "user_types.h"
 
@@ -390,4 +392,19 @@ void compute_compositions(int num_components,
     free_mat2D(sim_data.grad_vec, num_grid_cells + 1);
     free_mat2D(sim_data.flux_vec, num_grid_cells + 1);
     free_mat2D(sim_data.z_vec, num_grid_cells + 1);
+}
+
+void print_results(int num_components, b_comp_t bulb_compositions) {
+    
+    std::cout << "bulb 1" << std::endl;
+    for(int c = 0; c < num_components; ++c) {
+        std::cout << "Fraction of component " << c << ": ";
+        std::cout << bulb_compositions.x_b1[c] << std::endl;
+    }
+    
+    std::cout << "bulb 2" << std::endl;
+    for(int c = 0; c < num_components; ++c) {
+        std::cout << "Fraction of component " << c << ": ";
+        std::cout << bulb_compositions.x_b2[c] << std::endl;
+    }
 }
